@@ -49,14 +49,34 @@ window.addEventListener("keydown", (event) => {
 scene.add(mesh);
 
 // Camera
-const aspectRatio = sizes.width / sizes.height;
 const camera = new THREE.PerspectiveCamera(
   75,
   sizes.width / sizes.height,
-  1,
+  0.1,
   1000
 );
-camera.position.z = 2;
+
+// Position the camera above the scene
+camera.position.set(0, 10, 0);
+
+// Make the camera look towards the center of the scene
+camera.lookAt(0, 0, 0);
+
+// Bounds for box position
+const bounds = {
+  x: {
+    min: -9, // make the bounds larger
+    max: 9,
+  },
+  y: {
+    min: -6,
+    max: 6,
+  },
+  z: {
+    min: -6,
+    max: 6,
+  },
+};
 
 scene.add(camera);
 
@@ -69,16 +89,28 @@ renderer.setSize(sizes.width, sizes.height);
 // Animate
 const clock = new THREE.Clock();
 
-// Distance threshold
-const threshold = 15;
+const threshold = 15; // Distance threshold for resetting box position
+// Bounds for box position
 
 const tick = () => {
   const elapsedTime = clock.getElapsedTime();
 
-  // Update object position
-  mesh.position.x += movement.x;
-  mesh.position.y += movement.y;
-  mesh.position.z += movement.z;
+  // Update object position with bounds checking
+  mesh.position.x = THREE.MathUtils.clamp(
+    mesh.position.x + movement.x,
+    bounds.x.min,
+    bounds.x.max
+  );
+  mesh.position.y = THREE.MathUtils.clamp(
+    mesh.position.y + movement.y,
+    bounds.y.min,
+    bounds.y.max
+  );
+  mesh.position.z = THREE.MathUtils.clamp(
+    mesh.position.z + movement.z,
+    bounds.z.min,
+    bounds.z.max
+  );
 
   // Calculate distance between the box and the camera
   const distance = mesh.position.clone().sub(camera.position).length();
